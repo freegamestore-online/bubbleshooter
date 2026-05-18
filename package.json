@@ -1,0 +1,14 @@
+{
+  "name": "bubbleshooter",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": { "node": ">=22" },
+  "pnpm": { "onlyBuiltDependencies": ["esbuild"] },
+  "scripts": {
+    "dev": "pnpm --filter @bubbleshooter/web dev",
+    "build": "pnpm --filter @bubbleshooter/web build",
+    "preview": "pnpm --filter @bubbleshooter/web preview",
+    "typecheck": "pnpm --filter @bubbleshooter/web exec tsc -b",
+    "test": "pnpm --filter @bubbleshooter/web test"
+  }
+}
