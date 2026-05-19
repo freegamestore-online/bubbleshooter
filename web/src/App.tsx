@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { GameShell, GameTopbar, GameAuth, GameButton } from "@freegamestore/games";
+import { GameShell, GameTopbar, GameAuth, GameButton, useGameSounds } from "@freegamestore/games";
 import { useHighScore } from "./hooks/useHighScore";
+
+type SoundsApi = ReturnType<typeof useGameSounds>;
+
+function AudioBridge({ apiRef }: { apiRef: React.MutableRefObject<SoundsApi | null> }) {
+  const sounds = useGameSounds();
+  apiRef.current = sounds;
+  return null;
+}
 
 const COLS = 10;
 const ROWS = 14;
@@ -114,6 +122,8 @@ export default function App() {
   const [bestScore, updateHighScore] = useHighScore("bubbleshooter-best");
   const scoreRef = useRef(0);
   scoreRef.current = score;
+  const audioRef = useRef<SoundsApi | null>(null);
+  const gameOverPlayedRef = useRef(false);
 
   const reset = useCallback(() => {
     gridRef.current = freshGrid();
@@ -121,6 +131,7 @@ export default function App() {
     nextColorRef.current = Math.floor(Math.random() * COLORS.length);
     setScore(0);
     setGameOver(false);
+    gameOverPlayedRef.current = false;
     force((x) => x + 1);
   }, []);
 
@@ -240,6 +251,10 @@ export default function App() {
         updateHighScore(ns);
         return ns;
       });
+      audioRef.current?.playClear();
+      if (floaters.length > 0) {
+        audioRef.current?.playScore();
+      }
     }
     checkGameOver();
     // Pick next color from what's still on the board
@@ -257,6 +272,10 @@ export default function App() {
         const { y } = cellCenter(r, c, R);
         if (y > limit) {
           setGameOver(true);
+          if (!gameOverPlayedRef.current) {
+            gameOverPlayedRef.current = true;
+            audioRef.current?.playGameOver();
+          }
           return;
         }
       }
@@ -370,6 +389,7 @@ export default function App() {
       vy: (dy / len) * speed,
       color: nextColorRef.current,
     };
+    audioRef.current?.playMove();
   }
 
   return (
@@ -403,6 +423,7 @@ export default function App() {
         />
       }
     >
+      <AudioBridge apiRef={audioRef} />
       <div
         style={{
           position: "relative",
