@@ -120,7 +120,6 @@ export default function App() {
   const [gameOver, setGameOver] = useState(false);
   const gameOverRef = useRef(false);
   gameOverRef.current = gameOver;
-  const [_, force] = useState(0);
   const [bestScore, updateHighScore] = useHighScore("bubbleshooter-best");
   const scoreRef = useRef(0);
   scoreRef.current = score;
@@ -134,7 +133,6 @@ export default function App() {
     setScore(0);
     setGameOver(false);
     gameOverPlayedRef.current = false;
-    force((x) => x + 1);
   }, []);
 
   // Resize canvas and compute R to fit
