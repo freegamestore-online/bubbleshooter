@@ -118,6 +118,8 @@ export default function App() {
   const sizeRef = useRef({ w: 0, h: 0, R: 16 });
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const gameOverRef = useRef(false);
+  gameOverRef.current = gameOver;
   const [_, force] = useState(0);
   const [bestScore, updateHighScore] = useHighScore("bubbleshooter-best");
   const scoreRef = useRef(0);
@@ -246,11 +248,10 @@ export default function App() {
       const floaters = findFloaters(gridRef.current);
       for (const [rr, cc] of floaters) gridRef.current[rr]![cc] = null;
       const gained = cluster.length * 10 + floaters.length * 20;
-      setScore((s) => {
-        const ns = s + gained;
-        updateHighScore(ns);
-        return ns;
-      });
+      const ns = scoreRef.current + gained;
+      scoreRef.current = ns;
+      setScore(ns);
+      updateHighScore(ns);
       audioRef.current?.playClear();
       if (floaters.length > 0) {
         audioRef.current?.playScore();
@@ -300,9 +301,7 @@ export default function App() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const { w, h, R } = sizeRef.current;
-    // Background
-    ctx.fillStyle = "rgba(0,0,0,0.02)";
-    ctx.fillRect(0, 0, w, h);
+    ctx.clearRect(0, 0, w, h);
 
     // Grid bubbles
     const g = gridRef.current;
@@ -330,7 +329,7 @@ export default function App() {
     drawBubble(ctx, sx, sy, R - 1, COLORS[nextColorRef.current]!);
 
     // Aim line
-    if (!flyerRef.current && !gameOver) {
+    if (!flyerRef.current && !gameOverRef.current) {
       const dx = aimRef.current.x - sx;
       const dy = aimRef.current.y - sy;
       const len = Math.hypot(dx, dy) || 1;
